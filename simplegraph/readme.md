@@ -1,6 +1,6 @@
 # Simple Microsoft Graph API connection tool
 
-This code is derived from the (Microsoft Graph Python 3 Connect REST Sample)[https://github.com/microsoftgraph/python3-connect-rest-sample]. 
+This code is derived from the [Microsoft Graph Python 3 Connect REST Sample](https://github.com/microsoftgraph/python3-connect-rest-sample). 
 
 Like the Microsoft sample app, it is based on Python 3 and Flask, but the goal of this tool is to make the connection code as simple as possible, and to add links to manually explore a user's graph.
 
