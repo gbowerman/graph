@@ -6,4 +6,4 @@ Like the Microsoft sample app, it is based on Python 3 and Flask, but the goal o
 
 To run this code, the setup steps are the same as in the above example, except that instead of a _PRIVATE.txt file, it uses a file called graphconfig.json to store the application ID and application key.
 
-![Graph app image](./img/graphapp.png)
+![Graph app image](./img/graphapp.PNG)
