@@ -16,10 +16,10 @@ except FileNotFoundError:
     sys.exit('Error: Expecting graphconfig.json in current folder')
 
 client_id = config_data['appId']
-client_secret = config_data['clientSecret']
+client_secret = config_data['appSecret']
 
 app = Flask(__name__)
-app.secret_key = config_data['appSecret']
+app.secret_key = 'stoicism'
 oauth = OAuth(app)
 
 # local, no HTTPS, disable InsecureRequestWarning
