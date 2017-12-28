@@ -1,13 +1,13 @@
 '''Microsoft graph API test program'''
+import json
 import os
 import urllib.parse
 import uuid
-import json
 
 import adal
-import bottle
+from bottle import app, get, post, redirect, request, route, run, view
+from requests import Session
 from json2html import *
-import requests
 
 # graph api constants
 redirect_uri = 'http://localhost:5000/login/authorized'
@@ -26,30 +26,29 @@ client_id = config_data['appId']
 client_secret = config_data['clientSecret']
 
 os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # enable non-HTTPS for testing
-SESSION = requests.Session()
-bottle.TEMPLATE_PATH = ['./static/templates']
+SESSION = Session()
 
-
-def display_payload(payload):
+def display_payload(payload, apicall):
     '''Display JSON graph output in an HTML page'''
     header = '<h2>Graph output</h2><br/><br/>'
     form = '<br/><form action="/graphcall" method="post">' +\
-        'api: <input name="apicall" type="text" /> ' +\
+        'api: <input name="apicall" type="text" size=50 value="' + apicall + '"/> ' +\
         '<input type="submit" value="Call"/>' +\
-        ' [Examples: /me, /me/drive, /me/people/?$search=name]</form><br/>'
+        ' [Examples: /me, /me/drive, /me/people/?$search=name, ' +\
+        '/me/messages/?$select=subject,from&$search=Artificial]</form><br/>'
     htmldata = json2html.convert(json=payload)
     footer = '<p><a href="/">Restart</a></p>'
     return header + form + htmldata + footer
 
 
-@bottle.route('/')
-@bottle.view('homepage.html')
+@route('/')
+@view('homepage.html')
 def homepage():
     """Render the home page."""
     return {'sample': 'Microsoft Graph API'}
 
 
-@bottle.route('/login')
+@route('/login')
 def login():
     """Prompt user to authenticate."""
     auth_state = str(uuid.uuid4())
@@ -65,14 +64,14 @@ def login():
                                      'resource': resource_uri,
                                      'prompt': prompt_behavior})
 
-    return bottle.redirect(authority_url + '/oauth2/authorize?' + params)
+    return redirect(authority_url + '/oauth2/authorize?' + params)
 
 
-@bottle.route('/login/authorized')
+@route('/login/authorized')
 def authorized():
     """Handler for the application's Redirect Uri."""
-    code = bottle.request.query.code
-    auth_state = bottle.request.query.state
+    code = request.query.code
+    auth_state = request.query.state
     if auth_state != SESSION.auth_state:
         raise Exception('state returned to redirect URL does not match!')
     auth_context = adal.AuthenticationContext(authority_url, api_version=None)
@@ -84,10 +83,10 @@ def authorized():
                             'Content-Type': 'application/json',
                             'SdkVersion': 'sample-python-adal',
                             'return-client-request-id': 'true'})
-    return bottle.redirect('/maincall')
+    return redirect('/maincall')
 
 
-@bottle.get('/maincall')
+@get('/maincall')
 def maincall():
     """Confirm user authentication by calling Graph and displaying data."""
     apicall = '/me'
@@ -95,20 +94,19 @@ def maincall():
     http_headers = {'client-request-id': str(uuid.uuid4())}
     graphdata = SESSION.get(
         endpoint, headers=http_headers, stream=False).json()
-    return display_payload(graphdata)
+    return display_payload(graphdata, apicall)
 
 
-@bottle.post('/graphcall')
+@post('/graphcall')
 def graphcall():
     """Confirm user authentication by calling Graph and displaying data."""
-    apicall = bottle.request.forms.get('apicall')
-    #print('apicall is ' + apicall)
+    apicall = request.forms.get('apicall')
     endpoint = resource_uri + api_version + apicall
     http_headers = {'client-request-id': str(uuid.uuid4())}
     graphdata = SESSION.get(
         endpoint, headers=http_headers, stream=False).json()
-    return display_payload(graphdata)
+    return display_payload(graphdata, apicall)
 
 
 if __name__ == '__main__':
-    bottle.run(app=bottle.app(), server='wsgiref', host='localhost', port=5000)
+    run(app=app(), server='wsgiref', host='localhost', port=5000)
