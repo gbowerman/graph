@@ -40,6 +40,7 @@ def display_payload(payload, apicall='/me'):
         'Folder: <input name="folder" type="text" size=50 value="Sent Items"/> ' +\
         'From: <input name="from_date" type="text" size=20 value="2017-11-01"/> ' +\
         'To: <input name="to_date" type="text" size=20 value="2017-11-08"/> ' +\
+        'Search: <input name="search_str" type="text" size=20 value="wpa"/> ' +\
         '<input type="submit" value="Get"/></form><br/>'
     htmldata = json2html.convert(json=payload)
     footer = '<p><a href="/">Restart</a></p>'
@@ -120,6 +121,10 @@ def maildump():
     folder = request.forms.get('folder')
     from_date = request.forms.get('from_date')
     to_date = request.forms.get('to_date')
+    search_str = request.forms.get('search_str')
+    apply_search = False
+    if len(search_str) > 0:
+        apply_search = True
     endpoint = resource_uri + api_version + '/me/mailFolders'
     http_headers = {'client-request-id': str(uuid.uuid4())}
     skip_num = 0
@@ -137,9 +142,18 @@ def maildump():
                     '/messages?$select=subject,bodyPreview&$filter=sentDateTime ge ' + from_date +\
                      ' and sentDateTime le ' + to_date
                 maildata = SESSION.get(mailendpoint, headers=http_headers, stream=False).json()
+                if 'error' in maildata:
+                    return display_payload(maildata)
                 while 'value' in maildata and len(maildata['value']) > 0:
                     for mail in maildata['value']:
-                        mailtext += mail['subject'] + ' ' + mail['bodyPreview']
+                        # if there is a search string apply it manually here since graph doesn't
+                        # let you mix filter and search query parameters
+                        if apply_search is True:
+                            slower = search_str.lower()
+                            if slower in mail['subject'].lower() or slower in mail['bodyPreview'].lower():
+                                mailtext += mail['subject'] + ' ' + mail['bodyPreview'] + ' '
+                        else:
+                            mailtext += mail['subject'] + ' ' + mail['bodyPreview']
                     mail_skip += 10
                     maildata = SESSION.get(mailendpoint + '&$skip=' + str(mail_skip), headers=http_headers, stream=False).json()
                 return display_text(mailtext)
