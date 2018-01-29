@@ -263,8 +263,9 @@ def maildump():
 
                 # at this point mailtext has all the text we want
                 # strip punctuation
-                words = ''.join(c for c in mailtext if not c.isdigit())
-                words = ''.join(c for c in words if c not in punctuation).lower()
+                words = ''.join(c for c in mailtext if not c.isdigit()).lower()
+                words = words.replace('microsoft.com', '')
+                words = ''.join(c for c in words if c not in punctuation)
                 return show_analysis(words)
         # if there was no match and there's a next link, call again
         skip_num += 10
