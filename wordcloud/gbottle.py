@@ -123,7 +123,7 @@ def show_analysis(output):
     except Exception as e:
         keyphrase_html = 'Text analysis error: ' + str(e)
 
-    sentiment = '<h3>Sentiment analysis</h3>'
+    sentiment = '<h3>Sentiment analysis</h3><table><tr><td>'
     try:
         # call API
         conn = http.client.HTTPSConnection(text_analytics_uri)
@@ -133,8 +133,16 @@ def show_analysis(output):
         parsed = json.loads(data)
         print('Sentiment: ' + json.dumps(parsed))
         for document in parsed['documents']:
-            sentiment += 'Score = ' + str(document['score']) + '<br/>'
+            sentiment_val = document['score']
+            sentiment += 'Score = ' + str(sentiment_val) + '</td><td>'
         conn.close()
+        if sentiment_val < 0.4:
+            sentiment += '<img src="/static/img/sad.png" height="100" width="100"/>'
+        elif sentiment_val > 0.6:
+            sentiment += '<img src="/static/img/happy.png" height="100" width="100"/>'
+        else:
+            sentiment += '<img src="/static/img/neutral.png" height="100" width="100"/>'
+        sentiment += '</td></tr></table>'
 
     except Exception as e:
         sentiment = 'Sentiment analysis error: ' + str(e)
@@ -152,7 +160,7 @@ def show_analysis(output):
 @view('homepage.html')
 def homepage():
     """Render the home page."""
-    return {'sample': 'Microsoft Graph API'}
+    return {'sample': 'Microsoft Graph'}
 
 
 @route('/login')
