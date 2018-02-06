@@ -1,4 +1,0 @@
-Flask==0.12.2
-requests==2.18.4
-json2html==1.2.1
-Flask-oathlib==0.9.4
