@@ -7,4 +7,4 @@ The simplegraph/gbottle.py example is a hello world app to explore the Graph API
 ## WordCloud
 The wordcloud/gbottle.py app extracts more meaning from Graph output using the Python WordCloud library and Azure Cognitive Services API.
 
-![wordcloud graph output](./blob/master/wordcloud/img/graph_output.png)
+![wordcloud graph output](./wordcloud/img/graph_output.png)
