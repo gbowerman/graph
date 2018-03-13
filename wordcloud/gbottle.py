@@ -28,7 +28,7 @@ api_version = 'v1.0'
 today = datetime.datetime.now()
 to_date = str(today.date())
 from_date = str((today - datetime.timedelta(days=7)).date())
-search_str = 'wpa'
+search_str = ''
 folder = 'Sent Items'
 header = '<head><title>Graph output</title></head><body><h2>Graph output</h2><br/><br/>'
 footer = '<p><a href="/">Restart</a></p></body>'
