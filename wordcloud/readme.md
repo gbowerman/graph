@@ -12,5 +12,5 @@ Sentiment analysis and key phrase extraction is done using the [Azure Cognitive 
 
 The Graph authentication using Bottle was inspired by the [Simple ADAL Bottle](https://github.com/microsoftgraph/python-sample-auth/blob/master/sample_adal_bottle.py) Microsoft Graph sample app.
 
-If your mail volume is high, selected a short date range (e.g. 1 week or less) or it will take too long (and presumably get throttled at some point). 
+If your mail volume is high, select a short date range (e.g. 1 week or less) or it will take too long (and presumably get throttled at some point). 
 
