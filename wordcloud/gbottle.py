@@ -54,6 +54,16 @@ os.environ['OAUTHLIB_INSECURE_TRANSPORT'] = '1'  # enable non-HTTPS for testing
 SESSION = Session()
 
 
+def clean_data(mail_data):
+    ''' Do basic cleanup on a mail dump '''
+    delete_list = ['\\r\\n', 'From:', 'To:', 'Subject:', 'Sent:', 'https://', '@microsoft.com', '<', '>']
+    for crap in delete_list:
+        mail_data = mail_data.replace(crap, '')
+
+    clean_data = mail_data.replace('_', ' ')
+    return clean_data
+
+
 def search_form(mailfolder, fromdate, todate, searchstr):
     return '<br/><form action="/maildump" method="post">' +\
         'Folder: <input name="folder" type="text" size=50 value="' + mailfolder + '"/> ' +\
@@ -95,13 +105,17 @@ def show_analysis(output):
     # define parameters
     params = urllib.parse.urlencode({})
 
+    # basic clean up of data
+    clean_output = clean_data(output)[:2048]
+    print(clean_output)
+
     # request body
     body = {
         "documents": [
             {
                 "language": "en",
                 "id": "1",
-                "text": output[:4096]
+                "text": clean_output[:2048]
             }
         ]
     }
@@ -149,7 +163,7 @@ def show_analysis(output):
         sentiment = 'Sentiment analysis error: ' + str(e)
 
     # create a word cloud image file from the text payload
-    wordcloud = WordCloud(width=1200, height=600, max_font_size=70, stopwords=stopwords).generate(output)
+    wordcloud = WordCloud(width=1200, height=600, max_font_size=70, stopwords=stopwords).generate(clean_output)
     wcimage = wordcloud.to_image()
     wcimage.save('static/img/wcimg.png')
     htmlimg = '<h3>Word cloud</h3><p><img src="/static/img/wcimg.png"/></p>' 
