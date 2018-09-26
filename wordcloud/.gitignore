@@ -1,6 +1,6 @@
 # app related
 graphconfig.json
-wcimg.png
+static/img/wcimg.png
 
 # Windows image file caches
 Thumbs.db
