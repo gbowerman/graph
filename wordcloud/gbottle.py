@@ -127,7 +127,8 @@ def show_analysis(output):
     try:
         # call API
         conn = http.client.HTTPSConnection(text_analytics_uri)
-        conn.request("POST", "/text/analytics/v2.0/sentiment?%s" % params, str(body).encode('UTF-8'), headers)
+        # print('Sending this to sentiment analyzer: ' + str(body))
+        conn.request("POST", "/text/analytics/v2.0/sentiment", str(body).encode('UTF-8'), headers)
         response = conn.getresponse()
         data = response.read().decode('UTF-8')
         parsed = json.loads(data)
@@ -170,11 +171,13 @@ def login():
     SESSION.auth_state = auth_state
 
     #prompt_behavior = 'none'
-    prompt_behavior = 'select_account'
+    #prompt_behavior = 'select_account'
+    prompt_behavior = 'consent'
 
     params = urllib.parse.urlencode({'response_type': 'code',
                                      'client_id': client_id,
                                      'redirect_uri': redirect_uri,
+                                     'scopes': ['User.Read','Mail.Read'],
                                      'state': auth_state,
                                      'resource': resource_uri,
                                      'prompt': prompt_behavior})
@@ -221,6 +224,7 @@ def graphcall():
     http_headers = {'client-request-id': str(uuid.uuid4())}
     graphdata = SESSION.get(
         endpoint, headers=http_headers, stream=False).json()
+    print("output from get folders:" + json.dumps(graphdata))
     return display_payload(graphdata, apicall)
 
 @post('/maildump')
@@ -243,6 +247,7 @@ def maildump():
 
     # first get a list of folders
     graphdata = SESSION.get(endpoint, headers=http_headers, stream=False).json()
+    print("output from get folders: " + json.dumps(graphdata))
     while 'value' in graphdata:
         for folder_rec in graphdata['value']:
             if folder_rec['displayName'] == folder:
@@ -274,11 +279,11 @@ def maildump():
                 words = ''.join(c for c in mailtext if not c.isdigit()).lower()
                 words = words.replace('microsoft.com', '')
                 words = ''.join(c for c in words if c not in punctuation)
-                return show_analysis(words)
+                return show_analysis(mailtext)
         # if there was no match and there's a next link, call again
         skip_num += 10
         graphdata = SESSION.get(endpoint + '?$skip=' + str(skip_num), headers=http_headers, stream=False).json()
-    return display_text(folder_rec)
+    return show_analysis(mailtext)
 
 if __name__ == '__main__':
     run(app=app(), server='wsgiref', host='localhost', port=5000)
